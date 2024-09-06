@@ -14,6 +14,7 @@
 #' @param p_polyandry Probability that a female has any polyandry. Must be between 0 and 1.
 #' @param p_sire Probability that 'social' male sires all offspring. Must be between 0 and 1.
 #' @param p_retain Probability that social partnership is retained. Must be between 0 and 1.
+#' @param v_EPP Number indicating whether candidate extra-pair sires should have equal probability of siring extra-pair offspring within a clutch (0) or else the relative amount of variance in probability of extra-pair paternity success among candidate sires (>0).
 #' @param	constant_pop Logical. Should there be stochastic variation in population size
 #' @param known_age_structure Currently not in use
 #' @param verbose Logical - print simulation progress? useful for debugging
@@ -80,6 +81,7 @@ simulate_pedigree <- function(
 	p_polyandry = 0,
 	p_sire = 1, 
 	p_retain = 0, #
+	v_EPP = 0,
 	juv_surv = 0.25,
 	adult_surv = 0.5,
 	immigration = 0,
@@ -300,12 +302,24 @@ simulate_pedigree <- function(
 				#if p_polyandry==1 & p_sire==0 then sample(males,n_juv*length(breeding_females))
 
 
+## also allow for repeatable variance in EPP success
+### in the pool of `breeding_males` draw random variable from normal distribution
+### represents liability for gaining EPP in a clutch given any EPP within that clutch
+### Effectively, draw weighted sample for each EPP male identity from this probability
+## social males still assigned (above) without respect to this, hence why this
+### only affects distribution of reproductive success through EPP.
+## Probability of reproductive success through EPP is NOT retained year-to-year
+### or inherited in any way
+
+		#Mean=100 to ensure non-negative proability weights
+		w_EPP <- rnorm(length(breeding_males), 100, sqrt(v_EPP))  
+
                 socsires <- rep(social_male, n_juv) #return social sire in pedigree
 		sires <- if(p_polyandry==0) {
 				rep(social_male,n_juv)
 			}else if(p_polyandry==1 & p_sire==0){
 				## should it use sample_male here, so that all males are sampled once, and then its random? because otherwise the p_breed doesn't work?
-				sample(breeding_males,n_juv*length(breeding_females), replace=TRUE)
+				sample(breeding_males,n_juv*length(breeding_females), replace=TRUE, prob = w_EPP)
 			}else{
 				c(
 					lapply(1:n_pair,function(i){
@@ -316,11 +330,11 @@ simulate_pedigree <- function(
 						## this is calculated by sampling how many of the offspring the paired male sired, and then giving the same probability to subsequent males. This means that extra pair males will be few, and have several offspring if p_sire if high - think this is more realistic
 						if(p_sire==0) {
 							## should each breeding male sire at least one? so use smaple_male?
-							sample(breeding_males,n_juv[i])
+							sample(breeding_males,n_juv[i], prob = w_EPP)
 						}else{
 							within_sires <- fill_sires(n_juv[i],p_sire)
 							if(length(within_sires)>0){
-								c(social_male[i], sample(breeding_males,max(within_sires)-1,replace=TRUE))[within_sires]
+								c(social_male[i], sample(breeding_males,max(within_sires)-1,replace=TRUE, prob = w_EPP))[within_sires]
 								## have put replace=TRUE as if there are few males this might not work - some males might get chosen twice, but this will likely only happen when N is low, and so isn't unrealistic anyway
 							}else{ NULL }
 						}
