@@ -163,6 +163,7 @@ simulate_pedigree <- function(
 		animal = paste0("0_",1:sum(starting_n*2)),# or could code them with their cohort. using 0 means all founder are the same
 		dam = NA,
 		sire = NA,
+		socsire = NA,
 		# equal sex ratio to start
 		sex = rep(c("F","M"),sum(starting_n)),
 		## starting age structure for female and males, based on constant survival rate
@@ -299,6 +300,7 @@ simulate_pedigree <- function(
 				#if p_polyandry==1 & p_sire==0 then sample(males,n_juv*length(breeding_females))
 
 
+                socsires <- rep(social_male, n_juv) #return social sire in pedigree
 		sires <- if(p_polyandry==0) {
 				rep(social_male,n_juv)
 			}else if(p_polyandry==1 & p_sire==0){
@@ -347,6 +349,7 @@ simulate_pedigree <- function(
 				# fecundity
 				dam = rep(breeding_females,n_juv),
 				sire = sires,
+				socsire = socsires,
 				#equal sex ratio
 				sex = if(constant_pop){
 				# in fixed pop, need to create exact amounts, otherwise it might not work!
