@@ -30,7 +30,7 @@ simulate_pedigree(
 
 \item{afr}{Integer. Age at first reproduction}
 
-\item{p_breed}{Probability that a female breeds, must be between 0 and 1.}
+\item{p_breed}{Probability that a female breeds, must be between 0 and 1. Can be sex-specific if entered as a vector of length 2 (female,male).}
 
 \item{fecundity}{Mean number of juveniles a female produces each year.}
 
@@ -42,13 +42,11 @@ simulate_pedigree(
 
 \item{p_retain}{Probability that social partnership is retained. Must be between 0 and 1.}
 
-\item{v_EPP}{Number indicating whether candidate extra-pair sires should have equal probability of siring extra-pair offspring within a clutch (0) or else the relative amount of variance in probability of extra-pair paternity success among candidate sires (>0).}
+\item{juv_surv}{survival of juveniles until local recruitment, where recruitment is defined as having genetic offspring. Must be between 0 and 1. Can be sex-specific if entered as a vector of length 2 (female,male).}
 
-\item{juv_surv}{survival of juveniles until local recruitment, where recruitment is defined as having genetic offspring. Must be between 0 and 1.}
+\item{adult_surv}{survival of adults across years. Must be between 0 and 1. Can be sex-specific if entered as a vector of length 2 (female,male).}
 
-\item{adult_surv}{survival of adults across years. Must be between 0 and 1.}
-
-\item{immigration}{Yearly immigration, as a proportion of starting number of females (n_females). Must be between 0 and 1.}
+\item{immigration}{Yearly immigration, as a proportion of starting number of females (n_females). Must be between 0 and 1. Can be sex-specific if entered as a vector of length 2 (female,male).}
 
 \item{constant_pop}{Logical. Should there be stochastic variation in population size}
 
